@@ -1,0 +1,126 @@
+﻿@model Komar.Models.User
+@{
+    ViewData["Title"] = Model.Nick;
+    Layout = "/Views/User/_Layout.cshtml";
+}
+
+@functions {
+    private async Task NewBiteHtml()
+    {
+        <li onload="LoadBiteData(BITE_ID);">
+            <div>
+                <a asp-area=""
+                   asp-controller="User"
+                   asp-action="Index"
+                   asp-route-id="BITE_ID">
+                    <b>@Model.Nick</b>
+                </a> bit
+                <span style="color:#808080">just now</span>
+            </div>
+            <div>
+                BITE_TEXT
+            </div>
+            <div>
+                Bubbles: <span id="bubbleCount_BITE_ID">0</span>
+                <button class="btn-primary" id="bubbleButton_BITE_ID" onclick="BubbleBite(BITE_ID)">
+                    Bubble
+                </button>
+            </div>
+        </li>
+    }
+}
+
+<h1>@Model.Nick</h1>
+<h5>Tweet something new!</h5>
+<partial name="/Views/_BiteSubmit.cshtml" />
+<ul id="bitelist">
+</ul>
+<button onclick="LoadData('@Html.Raw(Model.Id)', false)">reload</button>
+@section Scripts
+{
+    <script type="text/javascript">
+        function submitBite() {
+            const biteText = $('#input').val();
+            if (!biteText || biteText == '') {
+                return;
+            }
+            $.ajax({
+                url: '/Bites/SubmitBite',
+                type: "POST",
+                dataType: "html",
+                data: { biteText },
+                success: function (data) {
+                    //add new bite to list
+                    let newBite = `@{await NewBiteHtml(); }`;
+                    newBite = newBite.replaceAll('BITE_ID', data);
+                    newBite = newBite.replaceAll('BITE_TEXT', biteText);
+                    $('#bitelist').prepend(newBite);
+                    //Clear input
+                    $('#input').val('');
+                },
+                error: function () { alert('error'); }
+            });
+        }
+        function LoadBubblesStatus(user, all) {
+            $.ajax({
+                url: '/Home/LoadBubblesStatus',
+                type: "GET",
+                dataType: "html",
+                data: { user, all },
+                success: function (data) {
+                    //Fill buttons with results
+                    data = JSON.parse(data);
+                    console.log(data);
+                    Object.keys(data).forEach(obj => {
+                        $(`#bubbleButton_${obj}`).html(data[obj] ? 'Unbubble' : 'Bubble');
+                    });
+                },
+                error: function () { alert('error'); }
+            });
+        }
+        LoadBubblesStatus('@Html.Raw(Model.Id)', false);
+        function LoadData(user, all) {
+            $.ajax({
+                url: '/Home/DisplayBitesFor',
+                type: "GET",
+                dataType: "html",
+                data: { user, all },
+                success: function (data) {
+                    //Fill div with results
+                    $("#bitelist").html(data);
+                    LoadBubblesStatus(user, all);
+                },
+                error: function () { alert('error'); }
+            });
+        }
+        LoadData('@Html.Raw(Model.Id)', false);
+        function LoadBiteData(bite) {
+            $.ajax({
+                url: '/Home/LoadBubbleData',
+                type: "GET",
+                dataType: "html",
+                data: { bite },
+                success: function (data) {
+                    data = JSON.parse(data);
+                    // Fill bite with results
+                    $(`#bubbleCount_${bite}`).html(data.bubbleCount);
+                    $(`#bubbleButton_${bite}`).html(data.bubbled ? 'Unbubble' : 'Bubble');
+                },
+                error: function () { alert('error'); }
+            });
+        }
+        function BubbleBite(bite) {
+            $.ajax({
+                url: '/Bubbles/Create',
+                type: "POST",
+                dataType: "html",
+                data: { biteId: bite },
+                success: function (data) {
+                    // Reload bite
+                    LoadBiteData(bite);
+                },
+                error: function () { alert('error when bubbling'); }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,18 @@
+﻿@{
+    ViewData["Title"] = "Error";
+    IEnumerable<string> errors = ViewBag.Errors;
+}
+
+<h1>An error has occured</h1>
+<ul>
+@foreach (var error in errors)
+{
+    <li>
+        <span class="text-danger">
+            @error
+        </span>
+    </li>
+}
+</ul>
+
+

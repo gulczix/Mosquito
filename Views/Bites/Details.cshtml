@@ -1,0 +1,33 @@
+﻿@model Komar.Models.Bite
+
+@{
+    ViewData["Title"] = "Details";
+}
+@functions {
+    private void Row<TResult>(System.Linq.Expressions.Expression<Func<Bite, TResult>> expression)
+    {
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(expression)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(expression)
+        </dd>
+    }
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Bite</h4>
+    <hr />
+    <dl class="row">
+        @{ Row(model => model.Text); }
+        @{ Row(model => model.CreationDate); }
+        @{ Row(model => model.User.Nick); }
+        @{ Row(model => model.BubbleCount); }
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

@@ -1,0 +1,80 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<User> UserManager
+@model IEnumerable<Komar.Models.User>
+@{
+    ViewData["Title"] = "Users";
+}
+
+@functions {
+    private async Task<bool> IsAdmin(User user)
+    {
+        return await UserManager.IsInRoleAsync(user, "Administrator");
+    }
+
+    private async Task MakeOrRemoveAdmin(User user)
+    {
+        if (await IsAdmin(user))
+        {
+            <a asp-action="RemoveAdmin" asp-route-id="@user.Id">
+                <input type="button" class="btn btn-danger" value="Remove Admin" />
+            </a>
+        }
+        else
+        {
+            <a asp-action="MakeAdmin" asp-route-id="@user.Id">
+                <input type="button" class="btn btn-success" value="Make Admin" />
+            </a>
+        }
+
+    }
+}
+
+<h1>Users</h1>
+<a asp-controller="Bites">
+    <input type="button" class="btn btn-secondary" value="View Bites" />
+</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Nick)
+            </th>
+            <th>
+                Role
+            </th>
+            <th>
+                Actions
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(model => user.Email)
+                </td>
+                <td>
+                    @Html.DisplayFor(model => user.Nick)
+                </td>
+                <td>
+                    @if (await IsAdmin(user)) {
+                        <span>Admin</span>
+                    }
+                    else
+                    {
+                        <span>User</span>
+                    }
+                </td>
+                <td>
+                    @{
+                        await MakeOrRemoveAdmin(user);
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

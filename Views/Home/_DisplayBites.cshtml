@@ -1,0 +1,24 @@
+﻿@model IEnumerable<Komar.Models.Bite>
+
+@foreach (var bite in Model) {
+    <li onload="LoadBiteData(@bite.Id);">
+        <div>
+            <a asp-area=""
+               asp-controller="User"
+               asp-action="Index"
+               asp-route-id="@bite.User.Id">
+                <b>@bite.User.Nick</b>
+            </a> bit at
+            <span style="color:#808080">@Html.DisplayFor(_ => bite.CreationDate)</span>
+        </div>
+        <div>
+            @bite.Text
+        </div>
+        <div>
+            Bubbles: <span id="bubbleCount_@bite.Id">@bite.BubbleCount</span>
+            <button class="btn-primary" id="bubbleButton_@bite.Id" onclick="BubbleBite(@bite.Id)">
+                Bubble
+            </button>
+        </div>
+    </li>
+}
